@@ -3,7 +3,6 @@ package rpc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,24 +11,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import db.DBConnection;
 import db.DBConnectionFactory;
-import entity.Item;
 
 /**
- * Servlet implementation class ItemHistory
+ * Servlet implementation class Rating
  */
-@WebServlet("/history")
-public class ItemHistory extends HttpServlet {
+@WebServlet("/rating")
+public class Rating extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public ItemHistory() {
+    public Rating() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -39,24 +36,7 @@ public class ItemHistory extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		String userId = request.getParameter("user_id");
-		JSONArray array = new JSONArray();
-
-		DBConnection conn = DBConnectionFactory.getConnection();
-		try {
-			Set<Item> items = conn.getFavoriteItems(userId);
-			
-			for (Item item : items) {
-				JSONObject obj = item.toJSONObject();
-				array.put(obj);
-			}
-
-			RpcHelper.writeJsonArray(response, array);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} finally {
-			conn.close();
-		}
+		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	/**
@@ -67,19 +47,18 @@ public class ItemHistory extends HttpServlet {
 		DBConnection connection = DBConnectionFactory.getConnection();
 	  	try {
 	  		JSONObject input = RpcHelper.readJSONObject(request);
-	  		String userId = input.getString("user_id");
 	  		JSONArray array = input.getJSONArray("item_ids");
-	  		boolean isLikeBtn = input.getBoolean("isLikeBtn");
 	  		
 	  		List<String> itemIds = new ArrayList<>();
 	  		for(int i = 0; i < array.length(); ++i) {
 	  			itemIds.add(array.getString(i));
 	  		}
-	  		List<Boolean> arrayRes = connection.updateLikeIt(userId, itemIds, isLikeBtn);
+	  		
+	  		List<Float> arrayRes = connection.calculateRating(itemIds);
 	  		
 	  		array = new JSONArray();
-        	for (Boolean bool : arrayRes) {
-        		array.put(bool);
+        	for (Float num : arrayRes) {
+        		array.put(num);
         	}
 	  		RpcHelper.writeJsonObject(response, new JSONObject()
 	  				.put("array", array).put("result", "SUCCESS"));
@@ -89,4 +68,5 @@ public class ItemHistory extends HttpServlet {
 	  		connection.close();
 	  	}
 	}
+
 }

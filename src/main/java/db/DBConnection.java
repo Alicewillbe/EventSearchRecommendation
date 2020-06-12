@@ -111,6 +111,28 @@ public interface DBConnection {
 	 */
 	public void checkLikeIt(String userId, Collection<Item> items);
 	
+	/**
+	 * get the rating of input items
+	 * 
+	 * @param items
+	 * @modify item in items to be updated as in data base
+	 */
+	public void getRating(Collection<Item> items);
+	
+	/**
+	 * calculate the rating of input items
+	 * 
+	 * @param itemIds
+	 * @modify item in items to be updated as in data base
+	 * @return  List<Float> -  
+	 *    each maps to the result of items
+	 *          true if user then likes this item
+	 *          false if user then dislikes this item
+	 *          null if user then neutral on this item
+	 *    whole list is null if unsuccessful
+	 */
+	public List<Float> calculateRating(List<String> itemIds);
+	
 	
 	/**
 	 * try to update the opinion user has on items to isLikeBtn
@@ -120,12 +142,11 @@ public interface DBConnection {
 	 * @param itemIds
 	 * @param isLikeBtn
 	 * @return List<Boolean> - 
-	 *          first element shows whether the update is successful
-	 *          
-	 *          for rest element, each maps to the result of items
+	 *      each maps to the result of items
 	 *          true if user then likes this item
 	 *          false if user then dislikes this item
 	 *          null if user then neutral on this item
+	 *      whole list is null if unsuccessful
 	 */
 	public List<Boolean> updateLikeIt(String userId, List<String> itemIds, boolean isLikeBtn);
 }

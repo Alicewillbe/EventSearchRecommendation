@@ -26,6 +26,10 @@ public class TicketMasterClient {
 	private static final String DEFAULT_KEYWORD = "event";
 	public static final String API_KEY = "QapzLPPyaxdoHV17Cd0GZdEDzgPXI9PQ";
 	
+	public static final String SORT = "distance,date,asc";
+	public static final int SIZE = 200;
+	public static final int RADIUS = 50;
+	
 	public List<Item> search(double lat, 
 			 				 double lon, 
 			 				 String keyword) {
@@ -39,13 +43,10 @@ public class TicketMasterClient {
 		}
 		
 		String geoPoint = util.GeoHash.encodeGeohash(lat, lon, 8);
-		String sort = "distance,date,asc";
-		int size = 200;
-		int radius = 50;
 
 		String query = String.format(
 				"apikey=%s&geoPoint=%s&keyword=%s&radius=%s&size=%s&sort=%s", 
-				API_KEY, geoPoint, keyword, radius, size, sort);
+				API_KEY, geoPoint, keyword, RADIUS, SIZE, SORT);
 		
 		String url = HOST + ENDPOINT + "?" + query;
 		StringBuilder responseBody = new StringBuilder();

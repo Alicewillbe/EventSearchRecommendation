@@ -399,7 +399,7 @@
   }
 
   /**
-   * API #2 Load favorite (or visited) items API end point: [GET]
+   * API #2 Load favorite items API end point: [GET]
    * /history?user_id=1111
    */
   function loadFavoriteItems() {
@@ -459,12 +459,15 @@
   }
 
   /**
-   * API #4 Toggle favorite (or visited) items
+   * API #4 Toggle favorite items
    *
    * @param item_id - The item business id
    *
-   * API end point: [POST]/[DELETE] /history request json data: {
-   * user_id: 1111, visited: [a_list_of_business_ids] }
+   * API end point: [POST]/history request json data: {
+   *   user_id: 1111, 
+   *   visited: [a_list_of_business_ids], 
+   *   isLikeBtn: button clicked is likes / dislikes 
+   * }
    */
   function changeFavoriteItem(item_id, isLikeBtn) {
     // check whether this item has been visited or not
@@ -476,8 +479,41 @@
     var url = './history';
     var req = JSON.stringify({
       user_id: user_id,
-      favorite: [item_id],
+      item_ids: [item_id],
       isLikeBtn: isLikeBtn
+    });
+
+    ajax('POST', url, req,
+      // successful callback
+      function(res) {
+    	changeRating(item_id);
+        var result = JSON.parse(res);
+        if (result.status === 'OK' || result.result === 'SUCCESS') {
+        	likeBtn.className = result.array[0] == true ? 
+        			'fa fa-thumbs-up fa-2x': 'fa fa-thumbs-o-up fa-2x';
+        	dislikeBtn.className = result.array[0] == false ? 
+        			'fa fa-thumbs-down fa-2x': 'fa fa-thumbs-o-down fa-2x';
+        }
+      });
+  }
+  
+  /**
+   * API #5 Update items rating
+   *
+   * @param item_id - The item business id
+   *
+   * API end point: [POST]/rating request json data: {
+   *   item_ids: [a_list_of_business_ids] 
+   * }
+   */
+  function changeRating(item_id) {
+    // check whether this item has been visited or not
+    var div = document.querySelector('#item-' + item_id + ' div.stars');
+    
+    // request parameters
+    var url = './rating';
+    var req = JSON.stringify({
+      item_ids: [item_id]
     });
 
     ajax('POST', url, req,
@@ -485,10 +521,7 @@
       function(res) {
         var result = JSON.parse(res);
         if (result.status === 'OK' || result.result === 'SUCCESS') {
-        	likeBtn.className = result.array[1] == true ? 
-        			'fa fa-thumbs-up fa-2x': 'fa fa-thumbs-o-up fa-2x';
-        	dislikeBtn.className = result.array[1] == false ? 
-        			'fa fa-thumbs-down fa-2x': 'fa fa-thumbs-o-down fa-2x';
+        	countingStars(div, result.array[0]);
         }
       });
   }
@@ -579,25 +612,10 @@
       className: 'stars'
     });
     
-    for (let i = 0; i < 5; i++) {
-    	if (i < Math.floor(item.rating)) {
-    		let star = $create('i', {
-				className: 'fa fa-star'
-			});
-			stars.appendChild(star);
-    	} else if (i < item.rating) {
-    		stars.appendChild($create('i', {
-    	        className: 'fa fa-star-half-o'
-    	    }));
-    	} else {
-    		stars.appendChild($create('i', {
-    	        className: 'fa fa-star-o'
-    	    }));
-    	}
-    }
+    countingStars(stars, item.rating);
 
     section.appendChild(stars);
-
+    
     li.appendChild(section);
 
     // address
@@ -615,14 +633,10 @@
     });
 
     // TODO: added thumbs up / down
-    let likeImg = 'fa fa-thumbs-o-up fa-2x';
-    let dislikeImg = 'fa fa-thumbs-o-down fa-2x';
-    
-    if (item.likeIt == true) {
-    	likeImg = 'fa fa-thumbs-up fa-2x';
-    } else if (item.likeIt == false) {
-    	dislikeImg = 'fa fa-thumbs-down fa-2x';
-    }
+    let likeImg = item.likeIt == true ? 
+    		'fa fa-thumbs-up fa-2x' : 'fa fa-thumbs-o-up fa-2x';
+    let dislikeImg = item.likeIt == false ? 
+    		'fa fa-thumbs-down fa-2x' :'fa fa-thumbs-o-down fa-2x';
     
     let likeBtn = $create('i', {
         id: 'like-icon-' + item_id,
@@ -647,6 +661,27 @@
 
     li.appendChild(favLink);
     itemList.appendChild(li);
+  }
+  
+  function countingStars(stars, rating) {
+	  stars.innerHTML = ''; // flush the previous stars
+	  
+	  for (let i = 0; i < 5; i++) {
+      	if (i < Math.floor(rating)) {
+    	  	let star = $create('i', {  
+		  		className: 'fa fa-star'
+			});
+			stars.appendChild(star);
+    	} else if (i < rating) {
+    		stars.appendChild($create('i', {
+    	        className: 'fa fa-star-half-o'
+    	    }));
+    	} else {
+    		stars.appendChild($create('i', {
+    	        className: 'fa fa-star-o'
+    	    }));
+    	}
+      }
   }
 
   init();

@@ -155,4 +155,14 @@ public class MongoDBConnection implements DBConnection {
 		return null;
 	}
 	
+	@Override
+	public void getRating(Collection<Item> items) {
+		// TODO Auto-generated method stub	
+	}
+	
+	@Override
+	public List<Float> calculateRating(List<String> itemIds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

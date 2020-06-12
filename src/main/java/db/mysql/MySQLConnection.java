@@ -304,7 +304,82 @@ public class MySQLConnection implements DBConnection {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		}	
+		}
+
+		getRating(items);
+	}
+	
+	@Override
+	public void getRating(Collection<Item> items) {
+		// TODO Auto-generated method stub
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return;
+		}
+		
+		try {
+			for (Item item : items) {
+				String sql = "SELECT * FROM items WHERE item_id = ?";
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				stmt.setString(1, item.getItemId());
+				ResultSet rs = stmt.executeQuery();
+				if (rs.next()) {
+					item.setRating(rs.getFloat("rating"));
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public List<Float> calculateRating(List<String> itemIds) {
+		// TODO Auto-generated method stub
+		List<Float> res = new ArrayList<>();
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return null;
+		}
+		
+		try {
+			for (String itemId : itemIds) {
+				float rating = calculateRating(itemId);
+				res.add(rating);
+				
+				String sql = "UPDATE items SET rating = ? WHERE item_id = ?";
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				stmt.setFloat(1, rating);
+				stmt.setString(2, itemId);
+				stmt.execute();
+			}
+			
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return res;
+	}
+	
+	private float calculateRating(String itemId) throws Exception {
+		int likes = 0;
+		
+		String sql = "SELECT COUNT(*) as count From history WHERE item_id = ? && like_it";
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		stmt.setString(1, itemId);
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) likes = rs.getInt("count");
+		
+		if (likes == 0) return 0F;
+		
+		int rater = 0;
+		sql = "SELECT COUNT(*) as count From history WHERE item_id = ?";
+		stmt = conn.prepareStatement(sql);
+		stmt.setString(1, itemId);
+		rs = stmt.executeQuery();
+		if (rs.next()) rater = rs.getInt("count");
+		
+		return 5F * likes / rater;
 	}
 	
 	@Override
@@ -314,7 +389,7 @@ public class MySQLConnection implements DBConnection {
 		if (conn == null) {
 			System.err.println("DB connection failed");
 			res.add(false);
-			return res;
+			return null;
 		}
 		
 		try {
@@ -322,14 +397,12 @@ public class MySQLConnection implements DBConnection {
 			  res.add(update(userId, itemId, isLikeBtn));
 			}
 			
-			res.add(0, true);
 			return res;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		
-		res.add(0, false);
-		return res;
+		return null;
 	}
 	
 	private Boolean update(String userId, String itemId, boolean likeIt) throws Exception {

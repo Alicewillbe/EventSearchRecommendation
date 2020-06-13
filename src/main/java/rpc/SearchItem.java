@@ -16,6 +16,7 @@ import db.DBConnection;
 import db.DBConnectionFactory;
 import entity.Item;
 import external.TicketMasterClient;
+import recommendation.NaiveRanking;
 
 /**
  * Servlet implementation class SearchItem
@@ -52,6 +53,8 @@ public class SearchItem extends HttpServlet {
         try {
         	List<Item> items = connection.searchItems(lat, lon, term);
         	connection.checkLikeIt(userId, items);
+        	
+        	items = new NaiveRanking().rankItems(userId, items);
 
         	JSONArray array = new JSONArray();
         	for (Item item : items) {

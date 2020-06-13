@@ -1,13 +1,7 @@
 package recommendation;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import db.DBConnection;
 import db.DBConnectionFactory;
@@ -20,9 +14,8 @@ public class CollaborativeFiltering {
 		
 		DBConnection connection = DBConnectionFactory.getConnection();
 		
-		// step 1: find similar users
+		// step 1: find similar users & get score for this users to rate unchosen items
 		
-		// step 2: find 
 		
 		connection.close();
 		return recommendedItems;

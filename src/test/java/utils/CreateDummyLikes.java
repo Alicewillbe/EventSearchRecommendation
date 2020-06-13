@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateDummyLikes {
+	public static final int NUM = 100;
+	
 	public static void createLikes(Connection conn) throws Exception {
-		int itemNum = 100;
+		int itemNum = NUM;
 		
 		// to keep the foreign key constraints
 		String sql = "INSERT IGNORE INTO history (user_id, item_id, like_it) " + 
@@ -27,7 +29,7 @@ public class CreateDummyLikes {
 	}
 	
 	public static void createLikesNaive(Connection conn) throws Exception {
-		int itemNum = 100;
+		int itemNum = NUM;
 		
 		// to keep the foreign key constraints
 		for (int i = 0; i < itemNum; i++) {
